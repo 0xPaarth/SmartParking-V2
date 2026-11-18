@@ -10,6 +10,7 @@ import com.smartparking.repository.ReservationRepository;
 import com.smartparking.service.CheckoutService;
 import com.smartparking.service.EntryService;
 import com.smartparking.service.PricingService;
+import com.smartparking.service.ParkingService;
 import com.smartparking.service.ReservationService;
 
 import java.util.ArrayList;
@@ -27,6 +28,7 @@ public final class UiServices {
     private final EntryService entryService;
     private final CheckoutService checkoutService;
     private final PricingService pricingService;
+    private final ParkingService parkingService;
 
     private UiServices(ParkingSlotRepository slotRepository,
                        ReservationRepository reservationRepository,
@@ -34,7 +36,8 @@ public final class UiServices {
                        ReservationService reservationService,
                        EntryService entryService,
                        CheckoutService checkoutService,
-                       PricingService pricingService) {
+                       PricingService pricingService,
+                       ParkingService parkingService) {
         this.slotRepository = slotRepository;
         this.reservationRepository = reservationRepository;
         this.sessionRepository = sessionRepository;
@@ -42,6 +45,7 @@ public final class UiServices {
         this.entryService = entryService;
         this.checkoutService = checkoutService;
         this.pricingService = pricingService;
+        this.parkingService = parkingService;
     }
 
     public static UiServices createDemo() {
@@ -68,14 +72,17 @@ public final class UiServices {
         ParkingSessionRepository sessionsRepo = new InMemoryParkingSessionRepository();
         PricingService pricing = new PricingService();
 
+        EntryService entry = new EntryService(slotsRepo, sessionsRepo);
+        CheckoutService checkout = new CheckoutService(slotsRepo, sessionsRepo, pricing);
         return new UiServices(
                 slotsRepo,
                 reservationsRepo,
                 sessionsRepo,
                 new ReservationService(slotsRepo, reservationsRepo),
-                new EntryService(slotsRepo, sessionsRepo),
-                new CheckoutService(slotsRepo, sessionsRepo, pricing),
-                pricing);
+                entry,
+                checkout,
+                pricing,
+                new ParkingService(slotsRepo, sessionsRepo, entry, checkout));
     }
 
     public ParkingSlotRepository slots() {
@@ -104,5 +111,9 @@ public final class UiServices {
 
     public PricingService pricingService() {
         return pricingService;
+    }
+
+    public ParkingService parkingService() {
+        return parkingService;
     }
 }

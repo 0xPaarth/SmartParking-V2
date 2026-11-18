@@ -204,3 +204,37 @@
 }
 .toast-success { -fx-background-color: #064e3b; -fx-text-fill: #a7f3d0; -fx-border-color: #10b981; -fx-border-radius: 12; }
 .toast-error { -fx-background-color: #4c1d24; -fx-text-fill: #fecdd3; -fx-border-color: #fb7185; -fx-border-radius: 12; }
+
+.slot-suggestion {
+    -fx-background-color: rgba(34, 211, 238, 0.12);
+    -fx-text-fill: #67e8f9;
+    -fx-background-radius: 10;
+    -fx-border-radius: 10;
+    -fx-border-color: rgba(34, 211, 238, 0.28);
+    -fx-padding: 12 14;
+    -fx-font-size: 15;
+    -fx-font-weight: 900;
+}
+.form-card { -fx-padding: 26; }
+.secondary-button {
+    -fx-background-color: #1e293b;
+    -fx-text-fill: #cbd5e1;
+    -fx-border-color: #334155;
+    -fx-padding: 12 16;
+}
+.secondary-button:hover {
+    -fx-background-color: #334155;
+    -fx-text-fill: #f8fafc;
+}
+.checkout-session {
+    -fx-background-color: #111827;
+    -fx-background-radius: 14;
+    -fx-border-color: #263449;
+    -fx-border-radius: 14;
+    -fx-padding: 18;
+}
+.walk-in-dialog {
+    -fx-background-color: #1e293b;
+    -fx-background-radius: 18;
+}
+.dialog-form { -fx-background-color: transparent; -fx-padding: 12 4; }

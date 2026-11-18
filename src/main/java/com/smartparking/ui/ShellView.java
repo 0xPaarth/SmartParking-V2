@@ -68,8 +68,8 @@ public final class ShellView {
         } else if (role == Role.ATTENDANT) {
             navButton(sidebar, "Operations", true, () -> setAttendantDashboard());
             navButton(sidebar, "Slot Map", false, () -> setSlotMap());
-            navButton(sidebar, "Check-In", false, () -> setSlotMap());
-            navButton(sidebar, "Check-Out", false, () -> setAttendantDashboard());
+            navButton(sidebar, "Check-In", false, () -> setCheckIn());
+            navButton(sidebar, "Check-Out", false, () -> setCheckOut());
         } else {
             navButton(sidebar, "Admin Overview", true, () -> setAdminPlaceholder());
             navButton(sidebar, "Users", false, () -> setAdminPlaceholder());
@@ -146,7 +146,17 @@ public final class ShellView {
 
     private void setSlotMap() {
         pageTitle.setText("Interactive slot map");
-        root.setCenter(new SlotMapView(services, root).getRoot());
+        root.setCenter(new SlotMapView(services, root, role).getRoot());
+    }
+
+    private void setCheckIn() {
+        pageTitle.setText("Vehicle check-in");
+        root.setCenter(new AttendantCheckInView(services, root).getRoot());
+    }
+
+    private void setCheckOut() {
+        pageTitle.setText("Vehicle check-out");
+        root.setCenter(new AttendantCheckOutView(services, root).getRoot());
     }
 
     private void setAdminPlaceholder() {

@@ -21,4 +21,13 @@ public final class InMemoryParkingSessionRepository implements ParkingSessionRep
     public Optional<ParkingSession> findById(UUID id) {
         return Optional.ofNullable(sessions.get(id));
     }
+
+    @Override
+    public synchronized Optional<ParkingSession> findActiveByPlate(String plateNumber) {
+        String normalized = plateNumber == null ? "" : plateNumber.trim().toUpperCase();
+        return sessions.values().stream()
+                .filter(session -> !session.isClosed())
+                .filter(session -> session.getVehicle().getPlateNumber().equals(normalized))
+                .findFirst();
+    }
 }

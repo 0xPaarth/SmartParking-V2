@@ -98,3 +98,37 @@
 .toast { -fx-background-radius: 12; -fx-font-size: 13; -fx-font-weight: 800; -fx-effect: dropshadow(gaussian, rgba(51,65,85,0.30),16,0.2,0,6); }
 .toast-success { -fx-background-color: #ecfdf5; -fx-text-fill: #047857; -fx-border-color: #10b981; -fx-border-radius: 12; }
 .toast-error { -fx-background-color: #fff1f2; -fx-text-fill: #be123c; -fx-border-color: #fb7185; -fx-border-radius: 12; }
+
+.slot-suggestion {
+    -fx-background-color: #ecfeff;
+    -fx-text-fill: #0891b2;
+    -fx-background-radius: 10;
+    -fx-border-radius: 10;
+    -fx-border-color: #a5f3fc;
+    -fx-padding: 12 14;
+    -fx-font-size: 15;
+    -fx-font-weight: 900;
+}
+.form-card { -fx-padding: 26; }
+.secondary-button {
+    -fx-background-color: #f8fafc;
+    -fx-text-fill: #475569;
+    -fx-border-color: #cbd5e1;
+    -fx-padding: 12 16;
+}
+.secondary-button:hover {
+    -fx-background-color: #eff6ff;
+    -fx-text-fill: #172033;
+}
+.checkout-session {
+    -fx-background-color: #f8fafc;
+    -fx-background-radius: 14;
+    -fx-border-color: #e2e8f0;
+    -fx-border-radius: 14;
+    -fx-padding: 18;
+}
+.walk-in-dialog {
+    -fx-background-color: #ffffff;
+    -fx-background-radius: 18;
+}
+.dialog-form { -fx-background-color: transparent; -fx-padding: 12 4; }

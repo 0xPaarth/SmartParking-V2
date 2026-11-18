@@ -1,12 +1,20 @@
 package com.smartparking.ui;
 
 import com.smartparking.domain.ParkingSlot;
+import com.smartparking.domain.Role;
 import com.smartparking.domain.SlotStatus;
+import com.smartparking.domain.VehicleType;
+import com.smartparking.domain.ParkingSession;
 import javafx.animation.TranslateTransition;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.TextField;
+import javafx.scene.control.Dialog;
+import javafx.scene.control.DialogPane;
+import javafx.scene.control.ButtonType;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
@@ -27,11 +35,15 @@ public final class SlotMapView {
     private final UiServices services;
     private final Pane toastParent;
     private final VBox detailPanel = new VBox(16);
+    private final Role role;
+    private GridPane grid;
+    private StackPane center;
     private boolean panelOpen;
 
-    public SlotMapView(UiServices services, Pane toastParent) {
+    public SlotMapView(UiServices services, Pane toastParent, Role role) {
         this.services = services;
         this.toastParent = toastParent;
+        this.role = role;
         build();
     }
 
@@ -51,7 +63,7 @@ public final class SlotMapView {
         header.getChildren().addAll(title, subtitle);
         root.setTop(header);
 
-        GridPane grid = new GridPane();
+        grid = new GridPane();
         grid.setHgap(18);
         grid.setVgap(24);
         grid.setAlignment(Pos.CENTER);
@@ -75,7 +87,7 @@ public final class SlotMapView {
         map.getStyleClass().add("map-panel");
         map.setPadding(new Insets(20));
 
-        StackPane center = new StackPane(map);
+        center = new StackPane(map);
         center.setAlignment(Pos.CENTER);
         center.setPadding(new Insets(8, 28, 28, 28));
         root.setCenter(center);
@@ -127,6 +139,13 @@ public final class SlotMapView {
                 LocalTime.now().withNano(0).toString());
 
         detailPanel.getChildren().addAll(header, stateLabel, plateCard, timeCard);
+        if (role == Role.ATTENDANT && slot.getStatus() == SlotStatus.AVAILABLE) {
+            Button assign = new Button("Assign Walk-in Vehicle");
+            assign.getStyleClass().addAll("primary-button", "large-button");
+            assign.setMaxWidth(Double.MAX_VALUE);
+            assign.setOnAction(event -> openWalkInDialog(slot));
+            detailPanel.getChildren().add(assign);
+        }
 
         if (!panelOpen) {
             detailPanel.setVisible(true);
@@ -139,6 +158,73 @@ public final class SlotMapView {
 
         if (slot.getStatus() == SlotStatus.AVAILABLE) {
             ToastNotification.show(toastParent, "Bay " + slot.getId() + " is ready to reserve", true);
+        }
+    }
+
+    private void openWalkInDialog(ParkingSlot slot) {
+        Dialog<WalkInInput> dialog = new Dialog<>();
+        dialog.setTitle("Assign Walk-in Vehicle");
+        dialog.setHeaderText("Check in to bay " + slot.getId());
+
+        DialogPane pane = dialog.getDialogPane();
+        pane.getStylesheets().addAll(root.getScene() == null
+                ? java.util.List.of()
+                : root.getScene().getStylesheets());
+        pane.getStyleClass().add("walk-in-dialog");
+        pane.getButtonTypes().addAll(ButtonType.CANCEL, ButtonType.OK);
+
+        VBox form = new VBox(14);
+        form.getStyleClass().add("dialog-form");
+        Label plateLabel = new Label("License Plate");
+        plateLabel.getStyleClass().add("floating-label");
+        TextField plate = new TextField();
+        plate.setPromptText("MH-12-3456");
+        plate.getStyleClass().add("floating-input");
+
+        Label typeLabel = new Label("Vehicle Type");
+        typeLabel.getStyleClass().add("floating-label");
+        ComboBox<VehicleType> type = new ComboBox<>();
+        type.getItems().setAll(
+                VehicleType.BIKE, VehicleType.CAR,
+                VehicleType.HEAVY_VEHICLE, VehicleType.EV_CAR);
+        type.setValue(VehicleType.CAR);
+        type.setMaxWidth(Double.MAX_VALUE);
+
+        form.getChildren().addAll(plateLabel, plate, typeLabel, type);
+        pane.setContent(form);
+
+        dialog.setResultConverter(button -> button == ButtonType.OK
+                ? new WalkInInput(plate.getText(), type.getValue())
+                : null);
+
+        dialog.showAndWait().ifPresent(input -> {
+            if (input.plateNumber().isBlank()) {
+                plate.getStyleClass().add("input-error");
+                ToastNotification.show(toastParent, "License plate is required", false);
+                return;
+            }
+            try {
+                ParkingSession session = services.parkingService().vehicleEntry(
+                        input.plateNumber(), input.vehicleType(), slot.getId());
+                refreshMap();
+                closeDetails();
+                ToastNotification.show(toastParent,
+                        "Vehicle " + session.getVehicle().getPlateNumber()
+                                + " checked into " + slot.getId(),
+                        true);
+            } catch (RuntimeException exception) {
+                ToastNotification.show(toastParent, exception.getMessage(), false);
+            }
+        });
+    }
+
+    private void refreshMap() {
+        grid.getChildren().clear();
+        for (ParkingSlot slot : services.slots().findAll()) {
+            String[] parts = slot.getId().split("-");
+            int row = parts[0].charAt(0) - 'A';
+            int column = Integer.parseInt(parts[1]) - 1;
+            grid.add(createBay(slot), column, row);
         }
     }
 
@@ -170,5 +256,8 @@ public final class SlotMapView {
             case RESERVED -> "status-reserved";
             case MAINTENANCE -> "status-maintenance";
         };
+    }
+
+    private record WalkInInput(String plateNumber, VehicleType vehicleType) {
     }
 }

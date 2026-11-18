@@ -9,4 +9,5 @@ import java.util.UUID;
 public interface ParkingSessionRepository {
     ParkingSession save(ParkingSession session);
     Optional<ParkingSession> findById(UUID id);
+    Optional<ParkingSession> findActiveByPlate(String plateNumber);
 }
